@@ -12,4 +12,5 @@ public interface ICourseService
     Task<Response<List<GetCourseDto>>> GetCourses();
     Task<Response<GetCourseDto>> GetCourseById(int id);
     Task<Response<List<StudentCountDto>>> GetCountStudentPerCourse();
+    Task<Response<List<StudentCountDto>>> GetAvgStudentPerCourse();
 }

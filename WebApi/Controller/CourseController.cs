@@ -1,3 +1,4 @@
+using Domain.Dtos;
 using Domain.Dtos.Courses;
 using Domain.Responces;
 using Infrastructure.Interfaces;
@@ -32,5 +33,12 @@ public class CourseController(ICourseService service)
     public async Task<Response<GetCourseDto>> GetCourseById(int id)
     {
         return await service.GetCourseById(id);
+    }
+
+    public async Task<Response<List<StudentCountDto>>> GetCountStudentPerCourse(){
+        return await service.GetCountStudentPerCourse();
+    }
+    public async Task<Response<List<StudentCountDto>>> GetAvgStudentPerCourse(){
+        return await service.GetAvgStudentPerCourse();
     }
 }

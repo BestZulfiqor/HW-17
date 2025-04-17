@@ -40,9 +40,22 @@ public class CourseService(DataContext context, IMapper mapper) : ICourseService
             : new Response<string>("Course deleted");
     }
 
+    public async Task<Response<List<StudentCountDto>>> GetAvgStudentPerCourse()
+    {
+        var students = await context.Courses.Select(n => new StudentCountDto
+        {
+            Title = n.Title,
+            Count = n.Enrollments.Average(n => n.Grade)
+        }).ToListAsync();
+
+        return new Response<List<StudentCountDto>>(students);
+    }
+
+
     public async Task<Response<List<StudentCountDto>>> GetCountStudentPerCourse()
     {
-        var students = await context.Courses.Select(n => new StudentCountDto{
+        var students = await context.Courses.Select(n => new StudentCountDto
+        {
             Title = n.Title,
             Count = n.Enrollments.Count
         }).ToListAsync();
