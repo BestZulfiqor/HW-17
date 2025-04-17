@@ -1,5 +1,6 @@
 using System.Net;
 using AutoMapper;
+using Domain.Dtos;
 using Domain.Dtos.Courses;
 using Domain.Entities;
 using Domain.Responces;
@@ -38,6 +39,17 @@ public class CourseService(DataContext context, IMapper mapper) : ICourseService
             ? new Response<string>(HttpStatusCode.BadRequest, "Course not deleted")
             : new Response<string>("Course deleted");
     }
+
+    public async Task<Response<List<StudentCountDto>>> GetCountStudentPerCourse()
+    {
+        var students = await context.Courses.Select(n => new StudentCountDto{
+            Title = n.Title,
+            Count = n.Enrollments.Count
+        }).ToListAsync();
+
+        return new Response<List<StudentCountDto>>(students);
+    }
+
 
     public async Task<Response<GetCourseDto>> GetCourseById(int id)
     {
