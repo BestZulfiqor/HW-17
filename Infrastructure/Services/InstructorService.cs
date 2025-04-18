@@ -1,6 +1,8 @@
 using System.Net;
 using AutoMapper;
+using Domain.Dtos;
 using Domain.Dtos.Instructors;
+using Domain.Dtos.Students;
 using Domain.Entities;
 using Domain.Filters;
 using Domain.Responces;
@@ -85,6 +87,18 @@ public class InstructorService(DataContext context, IMapper mapper) : IInstructu
             throw;
         }
     }
+
+    public async Task<Response<List<StudentCountDto>>> GetInstructorsWithCourseCount()
+    {
+        var instructors = await context.Instructors.Select(n => new StudentCountDto
+        {
+            Title = n.FirstName + " " + n.LastName,
+            Count = n.CourseAssignments.Count
+        }).ToListAsync();
+
+        return new Response<List<StudentCountDto>>(instructors);
+    }
+
 
     public async Task<Response<GetInstructorDto>> UpdateInstructor(int id, UpdateInstructorDto updateInstructorDto)
     {

@@ -84,7 +84,7 @@ public class EnrollmentService(DataContext context, IMapper mapper) : IEnrollmen
         }
         catch (System.Exception ex)
         {
-            System.Console.WriteLine(ex); // TODO
+            System.Console.WriteLine(ex);
             throw;
         }
     }

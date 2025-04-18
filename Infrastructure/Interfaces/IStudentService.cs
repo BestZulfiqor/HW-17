@@ -11,4 +11,5 @@ public interface IStudentService
     Task<Response<string>> DeleteStudent(int id);
     Task<Response<List<GetStudentDto>>> GetStudents(StudentFilter filter);
     Task<Response<GetStudentDto>> GetStudentById(int id);
+    Task<Response<List<GetStudentDto>>> GetStudentsWithoutCourse();
 }

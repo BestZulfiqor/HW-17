@@ -94,6 +94,16 @@ public class StudentService(DataContext context, IMapper mapper) : IStudentServi
         }
     }
 
+    public async Task<Response<List<GetStudentDto>>> GetStudentsWithoutCourse()
+    {
+        var students = await context.Students.Where(n => n.Enrollments.Count == 0)
+        .ToListAsync();
+
+        var data = mapper.Map<List<GetStudentDto>>(students);
+        return new Response<List<GetStudentDto>>(data);
+    }
+
+
     public async Task<Response<GetStudentDto>> UpdateStudent(int id, UpdateStudentDto updateStudentDto)
     {
         var exist = await context.Students.FindAsync(id);

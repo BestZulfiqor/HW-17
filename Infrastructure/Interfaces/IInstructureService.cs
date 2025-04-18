@@ -1,3 +1,4 @@
+using Domain.Dtos;
 using Domain.Dtos.Instructors;
 using Domain.Filters;
 using Domain.Responces;
@@ -11,4 +12,5 @@ public interface IInstructureService
     Task<Response<string>> DeleteInstructor(int id);
     Task<Response<List<GetInstructorDto>>> GetInstructors(InstructorFilter filter);
     Task<Response<GetInstructorDto>> GetInstructorById(int id);
+    Task<Response<List<StudentCountDto>>> GetInstructorsWithCourseCount();
 }

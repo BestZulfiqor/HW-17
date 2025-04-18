@@ -1,3 +1,4 @@
+using Domain.Dtos;
 using Domain.Dtos.Instructors;
 using Domain.Filters;
 using Domain.Responces;
@@ -33,5 +34,10 @@ public class InstructorController(IInstructureService service)
     public async Task<Response<GetInstructorDto>> GetInstructorById(int id)
     {
         return await service.GetInstructorById(id);
+    }
+
+    [HttpGet("instructors-with-course-count")]
+    public async Task<Response<List<StudentCountDto>>> GetInstructorsWithCourseCount(){
+        return await service.GetInstructorsWithCourseCount();
     }
 }

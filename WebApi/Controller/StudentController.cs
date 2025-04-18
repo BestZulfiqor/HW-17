@@ -25,7 +25,7 @@ public class StudentController(IStudentService service)
         return await service.DeleteStudent(id);
     }
     [HttpGet]
-    public async Task<Response<List<GetStudentDto>>> GetStudents([FromQuery]StudentFilter filter)
+    public async Task<Response<List<GetStudentDto>>> GetStudents([FromQuery] StudentFilter filter)
     {
         return await service.GetStudents(filter);
     }
@@ -33,5 +33,11 @@ public class StudentController(IStudentService service)
     public async Task<Response<GetStudentDto>> GetStudentById(int id)
     {
         return await service.GetStudentById(id);
+    }
+
+    [HttpGet("student-with-course-count")]
+    public async Task<Response<List<GetStudentDto>>> GetStudentsWithoutCourse()
+    {
+        return await service.GetStudentsWithoutCourse();
     }
 }
