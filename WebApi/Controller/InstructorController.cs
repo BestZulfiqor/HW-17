@@ -1,4 +1,5 @@
 using Domain.Dtos.Instructors;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,9 @@ public class InstructorController(IInstructureService service)
         return await service.DeleteInstructor(id);
     }
     [HttpGet]
-    public async Task<Response<List<GetInstructorDto>>> GetInstructors()
+    public async Task<Response<List<GetInstructorDto>>> GetInstructors([FromQuery]InstructorFilter filter)
     {
-        return await service.GetInstructors();
+        return await service.GetInstructors(filter);
     }
     [HttpGet("{id:int}")]
     public async Task<Response<GetInstructorDto>> GetInstructorById(int id)

@@ -2,6 +2,7 @@ using System.Net;
 using AutoMapper;
 using Domain.Dtos.Enrollments;
 using Domain.Entities;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
@@ -49,11 +50,43 @@ public class EnrollmentService(DataContext context, IMapper mapper) : IEnrollmen
         return new Response<GetEnrollmentDto>(dto);
     }
 
-    public async Task<Response<List<GetEnrollmentDto>>> GetEnrollments()
+    public async Task<Response<List<GetEnrollmentDto>>> GetEnrollments(EnrollmentFilter filter)
     {
-        var enrollments = await context.Enrollments.ToListAsync();
-        var data = mapper.Map<List<GetEnrollmentDto>>(enrollments);
-        return new Response<List<GetEnrollmentDto>>(data);
+        try
+        {
+            var validFilter = new ValidFilter(filter.PageNumber, filter.PageSize);
+
+            var enrollments = context.Enrollments.AsQueryable();
+
+            if (filter.From != null)
+            {
+                var minut = DateTime.UtcNow.Minute;
+                enrollments = enrollments.Where(s => minut - s.EnrollmentDate.Minute >= filter.From);
+            }
+            
+            if (filter.To != null)
+            {
+                var minut = DateTime.UtcNow.Minute;
+                enrollments = enrollments.Where(e => minut - e.EnrollmentDate.Minute <= filter.To);
+            }
+
+            var mapped = mapper.Map<List<GetEnrollmentDto>>(enrollments);
+
+            var totalRecords = mapped.Count;
+
+            var data = mapped
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
+                .ToList();
+
+            return new PagedResponce<List<GetEnrollmentDto>>(data, validFilter.PageNumber, validFilter.PageSize,
+                totalRecords);
+        }
+        catch (System.Exception ex)
+        {
+            System.Console.WriteLine(ex); // TODO
+            throw;
+        }
     }
 
     public async Task<Response<GetEnrollmentDto>> UpdateEnrollment(int id, UpdateEnrollmentDto updateEnrollmentDto)

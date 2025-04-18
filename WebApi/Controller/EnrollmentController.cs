@@ -1,4 +1,5 @@
 using Domain.Dtos.Enrollments;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,9 @@ public class EnrollmentController(IEnrollmentService service)
         return await service.DeleteEnrollment(id);
     }
     [HttpGet]
-    public async Task<Response<List<GetEnrollmentDto>>> GetEnrollments()
+    public async Task<Response<List<GetEnrollmentDto>>> GetEnrollments([FromQuery]EnrollmentFilter filter)
     {
-        return await service.GetEnrollments();
+        return await service.GetEnrollments(filter);
     }
     [HttpGet("{id:int}")]
     public async Task<Response<GetEnrollmentDto>> GetEnrollmentById(int id)

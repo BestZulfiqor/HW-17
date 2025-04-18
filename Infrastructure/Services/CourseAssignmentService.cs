@@ -2,6 +2,7 @@ using System.Net;
 using AutoMapper;
 using Domain.Dtos.CourseAssignments;
 using Domain.Entities;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
@@ -50,11 +51,30 @@ public class CourseAssignmentService(DataContext context, IMapper mapper) : ICou
         return new Response<GetCourseAssignmentDto>(dto);
     }
 
-    public async Task<Response<List<GetCourseAssignmentDto>>> GetCourseAssignments()
+    public async Task<Response<List<GetCourseAssignmentDto>>> GetCourseAssignments(CourseAssignmentFilter filter)
     {
-        var courses = await context.CourseAssignments.ToListAsync();
-        var data = mapper.Map<List<GetCourseAssignmentDto>>(courses);
-        return new Response<List<GetCourseAssignmentDto>>(data);
+        try
+        {
+            var validFilter = new ValidFilter(filter.PageNumber, filter.PageSize);
+
+            var courses = context.CourseAssignments.AsQueryable();
+
+            var mapped = mapper.Map<List<GetCourseAssignmentDto>>(courses);
+
+            var totalRecords = mapped.Count;
+
+            var data = mapped
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
+                .ToList();
+
+            return new PagedResponce<List<GetCourseAssignmentDto>>(data, validFilter.PageNumber, validFilter.PageSize, totalRecords);
+        }
+        catch (System.Exception ex)
+        {
+            System.Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<Response<GetCourseAssignmentDto>> UpdateCourseAssignment(int id, UpdateCourseAssignmentDto updateCourseAssignmentDto)
@@ -66,7 +86,7 @@ public class CourseAssignmentService(DataContext context, IMapper mapper) : ICou
         }
         exist.CourseId = updateCourseAssignmentDto.CourseId;
         exist.InstructorId = updateCourseAssignmentDto.InstructorId;
-        
+
         var dto = mapper.Map<GetCourseAssignmentDto>(exist);
 
         var result = await context.SaveChangesAsync();

@@ -2,6 +2,7 @@ using System.Net;
 using AutoMapper;
 using Domain.Dtos.Instructors;
 using Domain.Entities;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
@@ -53,11 +54,36 @@ public class InstructorService(DataContext context, IMapper mapper) : IInstructu
         return new Response<GetInstructorDto>(dto);
     }
 
-    public async Task<Response<List<GetInstructorDto>>> GetInstructors()
+    public async Task<Response<List<GetInstructorDto>>> GetInstructors(InstructorFilter filter)
     {
-        var instructors = await context.Instructors.ToListAsync();
-        var data = mapper.Map<List<GetInstructorDto>>(instructors);
-        return new Response<List<GetInstructorDto>>(data);
+        try
+        {
+            var validFilter = new ValidFilter(filter.PageNumber, filter.PageSize);
+
+            var instructors = context.Instructors.AsQueryable();
+
+            if (filter.Name != null)
+            {
+                instructors = instructors.Where(s => string.Concat(s.FirstName, " ", s.LastName).ToLower().Contains(filter.Name.ToLower()));
+            }
+
+            var mapped = mapper.Map<List<GetInstructorDto>>(instructors);
+
+            var totalRecords = mapped.Count;
+
+            var data = mapped
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
+                .ToList();
+
+            return new PagedResponce<List<GetInstructorDto>>(data, validFilter.PageNumber, validFilter.PageSize,
+                totalRecords);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<Response<GetInstructorDto>> UpdateInstructor(int id, UpdateInstructorDto updateInstructorDto)

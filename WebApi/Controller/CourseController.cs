@@ -1,5 +1,6 @@
 using Domain.Dtos;
 using Domain.Dtos.Courses;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -25,9 +26,9 @@ public class CourseController(ICourseService service)
         return await service.DeleteCourse(id);
     }
     [HttpGet]
-    public async Task<Response<List<GetCourseDto>>> GetCourses()
+    public async Task<Response<List<GetCourseDto>>> GetCourses([FromQuery] CourseFilter filter)
     {
-        return await service.GetCourses();
+        return await service.GetCourses(filter);
     }
     [HttpGet("{id:int}")]
     public async Task<Response<GetCourseDto>> GetCourseById(int id)
@@ -35,10 +36,21 @@ public class CourseController(ICourseService service)
         return await service.GetCourseById(id);
     }
 
-    public async Task<Response<List<StudentCountDto>>> GetCountStudentPerCourse(){
+    [HttpGet("student-per-course")]
+    public async Task<Response<List<StudentCountDto>>> GetCountStudentPerCourse()
+    {
         return await service.GetCountStudentPerCourse();
     }
-    public async Task<Response<List<StudentCountDto>>> GetAvgStudentPerCourse(){
+
+    [HttpGet("average")]
+    public async Task<Response<List<StudentCountDto>>> GetAvgStudentPerCourse()
+    {
         return await service.GetAvgStudentPerCourse();
+    }
+
+    [HttpGet("number-of-courses-each-student")]
+    public async Task<Response<List<StudentCountDto>>> Task3()
+    {
+        return await service.Task3();
     }
 }

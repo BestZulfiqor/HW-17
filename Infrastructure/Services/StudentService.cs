@@ -2,6 +2,7 @@ using System.Net;
 using AutoMapper;
 using Domain.Dtos.Students;
 using Domain.Entities;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
@@ -49,11 +50,48 @@ public class StudentService(DataContext context, IMapper mapper) : IStudentServi
         return new Response<GetStudentDto>(dto);
     }
 
-    public async Task<Response<List<GetStudentDto>>> GetStudents()
+    public async Task<Response<List<GetStudentDto>>> GetStudents(StudentFilter filter)
     {
-        var students = await context.Students.ToListAsync();
-        var data = mapper.Map<List<GetStudentDto>>(students);
-        return new Response<List<GetStudentDto>>(data);
+        try
+        {
+            var validFilter = new ValidFilter(filter.PageNumber, filter.PageSize);
+
+            var students = context.Students.AsQueryable();
+
+            if (filter.Name != null)
+            {
+                students = students.Where(s => string.Concat(s.FirstName, " ", s.LastName).ToLower().Contains(filter.Name.ToLower()));
+            }
+
+            if (filter.From != null)
+            {
+                var year = DateTime.UtcNow.Year;
+                students = students.Where(s => year - s.BirthDate.Year >= filter.From);
+            }
+
+            if (filter.To != null)
+            {
+                var year = DateTime.UtcNow.Year;
+                students = students.Where(s => year - s.BirthDate.Year <= filter.To);
+            }
+
+            var mapped = mapper.Map<List<GetStudentDto>>(students);
+
+            var totalRecords = mapped.Count;
+
+            var data = mapped
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
+                .ToList();
+
+            return new PagedResponce<List<GetStudentDto>>(data, validFilter.PageNumber, validFilter.PageSize,
+                totalRecords);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<Response<GetStudentDto>> UpdateStudent(int id, UpdateStudentDto updateStudentDto)
@@ -68,11 +106,11 @@ public class StudentService(DataContext context, IMapper mapper) : IStudentServi
         exist.FirstName = updateStudentDto.FirstName;
         exist.LastName = updateStudentDto.LastName;
         var result = await context.SaveChangesAsync();
-        
+
         var dto = mapper.Map<GetStudentDto>(exist);
-        
+
         return result == 0
-            ? new Response<GetStudentDto>(HttpStatusCode.BadRequest, "Student not updated") 
+            ? new Response<GetStudentDto>(HttpStatusCode.BadRequest, "Student not updated")
             : new Response<GetStudentDto>(dto);
     }
 }

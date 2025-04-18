@@ -1,4 +1,5 @@
 using Domain.Dtos.Students;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,9 @@ public class StudentController(IStudentService service)
         return await service.DeleteStudent(id);
     }
     [HttpGet]
-    public async Task<Response<List<GetStudentDto>>> GetStudents()
+    public async Task<Response<List<GetStudentDto>>> GetStudents([FromQuery]StudentFilter filter)
     {
-        return await service.GetStudents();
+        return await service.GetStudents(filter);
     }
     [HttpGet("{id:int}")]
     public async Task<Response<GetStudentDto>> GetStudentById(int id)

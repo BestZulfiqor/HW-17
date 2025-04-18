@@ -1,4 +1,5 @@
 using Domain.Dtos.CourseAssignments;
+using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -21,8 +22,8 @@ public class CourseAssignmentController(ICourseAssignmentService service)
         return await service.DeleteCourseAssignment(id);
     }
     [HttpGet]
-    public async Task<Response<List<GetCourseAssignmentDto>>> GetCourseAssignments(){
-        return await service.GetCourseAssignments();
+    public async Task<Response<List<GetCourseAssignmentDto>>> GetCourseAssignments([FromQuery]CourseAssignmentFilter filter){
+        return await service.GetCourseAssignments(filter);
     }
     [HttpGet("{id:int}")]
     public async Task<Response<GetCourseAssignmentDto>> GetCourseAssignmentById(int id){
