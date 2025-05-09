@@ -2,11 +2,13 @@ using Domain.Dtos.CourseAssignments;
 using Domain.Filters;
 using Domain.Responces;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controller;
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CourseAssignmentController(ICourseAssignmentService service)
 {
     [HttpPost]

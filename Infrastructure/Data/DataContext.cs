@@ -1,9 +1,10 @@
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
+public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext(options)
 {
     public DbSet<Student> Students { get; set; }
     public DbSet<Course> Courses { get; set; }
@@ -12,6 +13,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<CourseAssignment> CourseAssignments { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Enrollment>()
             .HasOne(n => n.Student)
             .WithMany(n => n.Enrollments)

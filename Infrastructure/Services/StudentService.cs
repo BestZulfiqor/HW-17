@@ -56,40 +56,45 @@ public class StudentService(DataContext context, IMapper mapper) : IStudentServi
         {
             var validFilter = new ValidFilter(filter.PageNumber, filter.PageSize);
 
-            var students = context.Students.AsQueryable();
+            var query = context.Students.AsQueryable();
 
-            if (filter.Name != null)
+            if (!string.IsNullOrEmpty(filter.Name))
             {
-                students = students.Where(s => string.Concat(s.FirstName, " ", s.LastName).ToLower().Contains(filter.Name.ToLower()));
+                query = query.Where(s => 
+                    (s.FirstName + " " + s.LastName).ToLower()
+                    .Contains(filter.Name.ToLower()));
             }
 
             if (filter.From != null)
             {
                 var year = DateTime.UtcNow.Year;
-                students = students.Where(s => year - s.BirthDate.Year >= filter.From);
+                query = query.Where(s => year - s.BirthDate.Year >= filter.From);
             }
 
             if (filter.To != null)
             {
                 var year = DateTime.UtcNow.Year;
-                students = students.Where(s => year - s.BirthDate.Year <= filter.To);
+                query = query.Where(s => year - s.BirthDate.Year <= filter.To);
             }
+
+            var totalRecords = await query.CountAsync();
+
+            var students = await query
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
+                .ToListAsync();
 
             var mapped = mapper.Map<List<GetStudentDto>>(students);
 
-            var totalRecords = mapped.Count;
-
-            var data = mapped
-                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
-                .Take(validFilter.PageSize)
-                .ToList();
-
-            return new PagedResponce<List<GetStudentDto>>(data, validFilter.PageNumber, validFilter.PageSize,
+            return new PagedResponce<List<GetStudentDto>>(
+                mapped, 
+                validFilter.PageNumber, 
+                validFilter.PageSize,
                 totalRecords);
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine(ex);
+            Console.WriteLine(ex);
             throw;
         }
     }
